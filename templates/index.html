@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">Fashion Detector</a>
+        <div class="nav-links">
+            <a href="#model">Model</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+    
+    <div class="hero-section">
+        <h1 class="hero-text">Discover Fashion Through AI</h1>
+        <p class="hero-description">
+            Experience real-time clothing recognition powered by advanced AI technology.
+        </p>
+        <a href="#model" class="try-model-btn" onclick="showVideo()">Try the Model</a>
+    </div>
+    
+    <section class="model-section" id="model">
+        <div class="container">
+            <h2 class="section-title">Our Clothing Detection Model</h2>
+            <p class="section-description">Upload an image or use your webcam to detect clothing items.</p>
+            
+            <div class="model-controls">
+                <button class="model-btn" onclick="document.getElementById('file-input').click()">
+                    Upload Image
+                </button>
+                <input type="file" id="file-input" accept="image/*" style="display: none;">
+                <button class="model-btn" onclick="showVideo()">Use Webcam</button>
+            </div>
+
+            <div class="model-display">
+                <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video feed">
+                <div id="upload-preview"></div>
+                <div class="webcam-controls">
+                    <button class="cancel-btn" onclick="hideVideo()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer" id="contact">
+        <div class="container">
+            <h2 class="section-title">Get in Touch</h2>
+            <div class="contact-info">
+                <p>Email: iciaradelinoordax@gmail.com</p>
+                <p>Github: iciaradelino</p>
+            </div>
+            <p class="copyright">© 2025 Fashion Detector</p>
+        </div>
+    </footer>
+
+    <script>
+        function showVideo() {
+        const videoFeed = document.getElementById('video-feed');
+        const uploadPreview = document.getElementById('upload-preview');
+        const webcamControls = document.querySelector('.webcam-controls');
+        uploadPreview.style.display = 'none';
+        videoFeed.style.display = 'block';
+        webcamControls.style.display = 'block';
+        videoFeed.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideVideo() {
+            const videoFeed = document.getElementById('video-feed');
+            const webcamControls = document.querySelector('.webcam-controls');
+            videoFeed.style.display = 'none';
+            webcamControls.style.display = 'none';
+        }
+
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const uploadPreview = document.getElementById('upload-preview');
+                    const videoFeed = document.getElementById('video-feed');
+                    uploadPreview.innerHTML = `<img src="${e.target.result}" alt="Uploaded image">`;
+                    videoFeed.style.display = 'none';
+                    uploadPreview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
