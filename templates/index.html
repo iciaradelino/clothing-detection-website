@@ -41,20 +41,68 @@
                 <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video feed">
                 <div id="upload-preview"></div>
                 <div class="webcam-controls">
+                    <button class="capture-btn" onclick="captureImage()">Capture Image</button>
                     <button class="cancel-btn" onclick="hideVideo()">Cancel</button>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="footer" id="contact">
+    <!-- Add after hero section and before model section -->
+    <section class="categories-section">
         <div class="container">
-            <h2 class="section-title">Get in Touch</h2>
-            <div class="contact-info">
-                <p>Email: iciaradelinoordax@gmail.com</p>
-                <p>Github: iciaradelino</p>
+            <h2 class="section-title">Detectable Items</h2>
+            <p class="section-description">Our AI model can identify various clothing items and accessories</p>
+            
+            <div class="categories-grid">
+                <div class="category-card">
+                    <div class="category-icon">👕</div>
+                    <h3>Upper Body</h3>
+                    <p>T-shirts, Shirts, Blouses, Tank tops, Sweaters</p>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">👖</div>
+                    <h3>Lower Body</h3>
+                    <p>Pants, Jeans, Shorts, Skirts</p>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">👞</div>
+                    <h3>Footwear</h3>
+                    <p>Shoes, Boots, Sneakers, Sandals</p>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">🧢</div>
+                    <h3>Accessories</h3>
+                    <p>Hats, Caps, Scarves, Ties, Belts, Bags</p>
+                </div>
             </div>
-            <p class="copyright">© 2025 Fashion Detector</p>
+        </div>
+    </section>
+
+    <section class="tech-section">
+        <div class="container">
+            <h2 class="section-title">Technology Behind</h2>
+            <div class="tech-container">
+                <div class="tech-info">
+                    <h3>YOLO Model</h3>
+                    <p>This project utilizes YOLOv8, a state-of-the-art object detection model known for its speed and accuracy in real-time applications.</p>
+                </div>
+                <div class="tech-info">
+                    <h3>Fashionpedia Dataset</h3>
+                    <p>Trained on the comprehensive Fashionpedia dataset, providing accurate detection of various fashion items.</p>
+                    <a href="https://www.kaggle.com/datasets/pranaysanam/fashionpedia" class="dataset-link" target="_blank">View Dataset on Kaggle</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer class="footer" id="contact">
+        <div class="container footer-content">
+            <h2 class="footer-title">Get in Touch</h2>
+            <div class="footer-info">
+                <a href="mailto:iciaradelinoordax@gmail.com">iciaradelinoordax@gmail.com</a>
+                <span class="separator">|</span>
+                <a href="https://github.com/iciaradelino" target="_blank">github.com/iciaradelino</a>
+            </div>
         </div>
     </footer>
 
@@ -90,6 +138,28 @@
                 reader.readAsDataURL(file);
             }
         });
+
+        function captureImage() {
+        const videoFeed = document.getElementById('video-feed');
+        
+        // Create a canvas element
+        const canvas = document.createElement('canvas');
+        canvas.width = videoFeed.naturalWidth;
+        canvas.height = videoFeed.naturalHeight;
+        
+        // Draw the current frame from video feed to canvas
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoFeed, 0, 0);
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.download = 'fashion-detection.png';
+        link.href = canvas.toDataURL('image/png');
+        
+        // Trigger download
+        link.click();
+        }
+        
     </script>
 </body>
 </html>
