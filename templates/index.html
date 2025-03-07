@@ -38,11 +38,18 @@
             </div>
 
             <div class="model-display">
-                <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video feed">
+                <div class="video-container">
+                    <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video feed">
+                    <div class="webcam-controls">
+                        <button class="capture-btn" onclick="captureImage()">Capture Image</button>
+                        <button class="analyze-btn" onclick="analyzeFrame()">Analyze Items</button>
+                        <button class="cancel-btn" onclick="hideVideo()">Cancel</button>
+                    </div>
+                </div>
                 <div id="upload-preview"></div>
-                <div class="webcam-controls">
-                    <button class="capture-btn" onclick="captureImage()">Capture Image</button>
-                    <button class="cancel-btn" onclick="hideVideo()">Cancel</button>
+                <div id="detected-items" class="detected-items" style="display: none;">
+                    <h3>Detected Items</h3>
+                    <div id="items-grid" class="items-grid"></div>
                 </div>
             </div>
         </div>
@@ -108,20 +115,34 @@
 
     <script>
         function showVideo() {
-        const videoFeed = document.getElementById('video-feed');
-        const uploadPreview = document.getElementById('upload-preview');
-        const webcamControls = document.querySelector('.webcam-controls');
-        uploadPreview.style.display = 'none';
-        videoFeed.style.display = 'block';
-        webcamControls.style.display = 'block';
-        videoFeed.scrollIntoView({ behavior: 'smooth' });
+            const videoFeed = document.getElementById('video-feed');
+            const uploadPreview = document.getElementById('upload-preview');
+            const webcamControls = document.querySelector('.webcam-controls');
+            const detectedItems = document.getElementById('detected-items');
+            
+            // Set the video feed source
+            videoFeed.src = "/video_feed";
+            
+            // Add error handling for the video feed
+            videoFeed.onerror = function() {
+                alert("Error accessing webcam. Please make sure your webcam is connected and you have granted permission to use it.");
+                hideVideo();
+            };
+            
+            uploadPreview.style.display = 'none';
+            videoFeed.style.display = 'block';
+            webcamControls.style.display = 'flex';
+            detectedItems.style.display = 'none';  // Ensure it's hidden when showing video
+            videoFeed.scrollIntoView({ behavior: 'smooth' });
         }
 
         function hideVideo() {
             const videoFeed = document.getElementById('video-feed');
             const webcamControls = document.querySelector('.webcam-controls');
+            const detectedItems = document.getElementById('detected-items');
             videoFeed.style.display = 'none';
             webcamControls.style.display = 'none';
+            detectedItems.style.display = 'none';  // Hide detected items when canceling
         }
 
         document.getElementById('file-input').addEventListener('change', function(e) {
@@ -159,7 +180,47 @@
         // Trigger download
         link.click();
         }
-        
+       
+        function analyzeFrame() {
+            const videoFeed = document.getElementById('video-feed');
+            const detectedItems = document.getElementById('detected-items');
+            const itemsGrid = document.getElementById('items-grid');
+            
+            // Show the detected items section when analyzing
+            detectedItems.style.display = 'block';
+            
+            // Create a canvas to capture the full frame
+            const canvas = document.createElement('canvas');
+            canvas.width = videoFeed.naturalWidth;
+            canvas.height = videoFeed.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoFeed, 0, 0);
+            
+            // Send the frame to the server for analysis
+            canvas.toBlob(function(blob) {
+                const formData = new FormData();
+                formData.append('image', blob);
+                
+                fetch('/analyze_frame', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    itemsGrid.innerHTML = '';
+                    data.items.forEach(item => {
+                        const itemCard = document.createElement('div');
+                        itemCard.className = 'item-card';
+                        itemCard.innerHTML = `
+                            <img src="data:image/jpeg;base64,${item.image}" alt="${item.label}">
+                            <div class="item-label">${item.label}</div>
+                        `;
+                        itemsGrid.appendChild(itemCard);
+                    });
+                    detectedItems.style.display = 'block';
+                });
+            }, 'image/jpeg');
+        }
     </script>
 </body>
 </html>
