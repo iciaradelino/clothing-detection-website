@@ -4,58 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fashion Detector</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <nav class="navbar">
-        <a href="/" class="logo">Fashion Detector</a>
-        <div class="nav-links">
-            <a href="#model">Model</a>
-            <a href="#contact">Contact</a>
+        <div class="container nav-container">
+            <a href="/" class="logo">Fashion Detector</a>
+            <div class="nav-links">
+                <a href="#model">Model</a>
+                <a href="#contact">Contact</a>
+            </div>
         </div>
     </nav>
     
     <div class="hero-section">
-        <h1 class="hero-text">Discover Fashion Through AI</h1>
-        <p class="hero-description">
-            Experience real-time clothing recognition powered by advanced AI technology.
-        </p>
-        <a href="#model" class="try-model-btn" onclick="showVideo()">Try the Model</a>
+        <div class="container">
+            <h1 class="hero-text">Discover Fashion Through AI</h1>
+            <p class="hero-description">
+                Experience real-time clothing recognition powered by advanced AI technology.
+            </p>
+            <a href="#model" class="try-model-btn" onclick="showVideo()">Try the Model</a>
+        </div>
     </div>
     
-    <section class="model-section" id="model">
-        <div class="container">
-            <h2 class="section-title">Our Clothing Detection Model</h2>
-            <p class="section-description">Upload an image or use your webcam to detect clothing items.</p>
-            
-            <div class="model-controls">
-                <button class="model-btn" onclick="document.getElementById('file-input').click()">
-                    Upload Image
-                </button>
-                <input type="file" id="file-input" accept="image/*" style="display: none;">
-                <button class="model-btn" onclick="showVideo()">Use Webcam</button>
-            </div>
-
-            <div class="model-display">
-                <div class="video-container">
-                    <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video feed">
-                    <div class="webcam-controls">
-                        <button class="capture-btn" onclick="captureImage()">Capture Image</button>
-                        <button class="analyze-btn" onclick="analyzeFrame()">Analyze Items</button>
-                        <button class="cancel-btn" onclick="hideVideo()">Cancel</button>
-                    </div>
-                </div>
-                <div id="upload-preview"></div>
-                <div id="detected-items" class="detected-items" style="display: none;">
-                    <h3>Detected Items</h3>
-                    <div id="items-grid" class="items-grid"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Add after hero section and before model section -->
     <section class="categories-section">
         <div class="container">
             <h2 class="section-title">Detectable Items</h2>
@@ -86,6 +58,37 @@
         </div>
     </section>
 
+    <section class="model-section" id="model">
+        <div class="container">
+            <h2 class="section-title">Our Clothing Detection Model</h2>
+            <p class="section-description">Upload an image or use your webcam to detect clothing items.</p>
+            
+            <div class="model-controls">
+                <button class="model-btn" onclick="document.getElementById('file-input').click()">
+                    Upload Image
+                </button>
+                <input type="file" id="file-input" accept="image/*" style="display: none;">
+                <button class="model-btn" onclick="showVideo()">Use Webcam</button>
+            </div>
+
+            <div class="model-display">
+                <div class="video-container">
+                    <img id="video-feed" src="" alt="Video feed">
+                    <div class="webcam-controls">
+                        <button class="capture-btn" onclick="captureImage()">Capture Image</button>
+                        <button class="analyze-btn" onclick="analyzeFrame()">Analyze Items</button>
+                        <button class="cancel-btn" onclick="hideVideo()">Cancel</button>
+                    </div>
+                </div>
+                <div id="upload-preview"></div>
+                <div id="detected-items" class="detected-items" style="display: none;">
+                    <h3>Detected Items</h3>
+                    <div id="items-grid" class="items-grid"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="tech-section">
         <div class="container">
             <h2 class="section-title">Technology Behind</h2>
@@ -102,52 +105,110 @@
             </div>
         </div>
     </section>
+    
     <footer class="footer" id="contact">
-        <div class="container footer-content">
+        <div class="container">
             <h2 class="footer-title">Get in Touch</h2>
             <div class="footer-info">
                 <a href="mailto:iciaradelinoordax@gmail.com">iciaradelinoordax@gmail.com</a>
-                <span class="separator">|</span>
+                    <span class="separator">|</span>
                 <a href="https://github.com/iciaradelino" target="_blank">github.com/iciaradelino</a>
+                    <span class="separator">|</span>
+                <a href="https://iciaradelino.netlify.app" target="_blank">iciaradelino.netlify.app</a>
             </div>
         </div>
     </footer>
 
     <script>
+        // Track the webcam state
+        let webcamActive = false;
+        
         function showVideo() {
             const videoFeed = document.getElementById('video-feed');
             const uploadPreview = document.getElementById('upload-preview');
             const webcamControls = document.querySelector('.webcam-controls');
             const detectedItems = document.getElementById('detected-items');
             
-            // Set the video feed source
-            videoFeed.src = "/video_feed";
+            // Don't initialize webcam if it's already active
+            if (webcamActive) return;
             
-            // Add error handling for the video feed
-            videoFeed.onerror = function() {
+            // Clear any previous error handlers
+            videoFeed.onerror = null;
+            
+            // Hide other elements first
+            uploadPreview.style.display = 'none';
+            detectedItems.style.display = 'none';
+            
+            // Show loader or indicator that webcam is initializing
+            videoFeed.style.display = 'block';
+            videoFeed.alt = "Loading webcam...";
+            webcamControls.style.display = 'flex';
+            
+            // Add error handling before setting the source
+            videoFeed.onerror = function(e) {
+                console.error("Webcam error:", e);
                 alert("Error accessing webcam. Please make sure your webcam is connected and you have granted permission to use it.");
-                hideVideo();
+                hideVideo(true); // true indicates an error occurred
             };
             
-            uploadPreview.style.display = 'none';
-            videoFeed.style.display = 'block';
-            webcamControls.style.display = 'flex';
-            detectedItems.style.display = 'none';  // Ensure it's hidden when showing video
+            // Set the video feed source with a cache-busting parameter
+            const timestamp = new Date().getTime();
+            videoFeed.src = "{{ url_for('video_feed') }}?t=" + timestamp;
+            
+            // Mark webcam as active
+            webcamActive = true;
+            
+            // Scroll to the video feed
             videoFeed.scrollIntoView({ behavior: 'smooth' });
         }
 
-        function hideVideo() {
+        function hideVideo(isError = false) {
+            if (!webcamActive && !isError) return;
+            
             const videoFeed = document.getElementById('video-feed');
             const webcamControls = document.querySelector('.webcam-controls');
             const detectedItems = document.getElementById('detected-items');
-            videoFeed.style.display = 'none';
+            
+            // First hide UI elements
             webcamControls.style.display = 'none';
-            detectedItems.style.display = 'none';  // Hide detected items when canceling
+            detectedItems.style.display = 'none';
+            
+            // Clear the video feed
+            videoFeed.onerror = null; // Remove error handler
+            videoFeed.alt = "Video feed";
+            
+            // Create a separate cleanup request to terminate server-side resources
+            if (webcamActive) {
+                fetch('/stop_webcam', { method: 'POST' })
+                .catch(err => console.log('Webcam cleanup request:', err));
+            }
+            
+            // Clear the src attribute to stop the video stream
+            videoFeed.src = "";
+            videoFeed.style.display = 'none';
+            
+            // Mark webcam as inactive
+            webcamActive = false;
         }
+
+        // Ensure resources are cleaned up when page is unloaded
+        window.addEventListener('beforeunload', function() {
+            if (webcamActive) {
+                fetch('/stop_webcam', { 
+                    method: 'POST',
+                    keepalive: true 
+                });
+            }
+        });
 
         document.getElementById('file-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
+                // If webcam is active, hide it first
+                if (webcamActive) {
+                    hideVideo();
+                }
+                
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const uploadPreview = document.getElementById('upload-preview');
@@ -161,24 +222,29 @@
         });
 
         function captureImage() {
-        const videoFeed = document.getElementById('video-feed');
-        
-        // Create a canvas element
-        const canvas = document.createElement('canvas');
-        canvas.width = videoFeed.naturalWidth;
-        canvas.height = videoFeed.naturalHeight;
-        
-        // Draw the current frame from video feed to canvas
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoFeed, 0, 0);
-        
-        // Create download link
-        const link = document.createElement('a');
-        link.download = 'fashion-detection.png';
-        link.href = canvas.toDataURL('image/png');
-        
-        // Trigger download
-        link.click();
+            const videoFeed = document.getElementById('video-feed');
+            
+            if (!webcamActive || !videoFeed.complete || videoFeed.naturalWidth === 0) {
+                alert("Webcam is not ready. Please wait a moment and try again.");
+                return;
+            }
+            
+            // Create a canvas element
+            const canvas = document.createElement('canvas');
+            canvas.width = videoFeed.naturalWidth;
+            canvas.height = videoFeed.naturalHeight;
+            
+            // Draw the current frame from video feed to canvas
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoFeed, 0, 0);
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = 'fashion-detection.png';
+            link.href = canvas.toDataURL('image/png');
+            
+            // Trigger download
+            link.click();
         }
        
         function analyzeFrame() {
@@ -186,7 +252,13 @@
             const detectedItems = document.getElementById('detected-items');
             const itemsGrid = document.getElementById('items-grid');
             
-            // Show the detected items section when analyzing
+            if (!webcamActive || !videoFeed.complete || videoFeed.naturalWidth === 0) {
+                alert("Webcam is not ready. Please wait a moment and try again.");
+                return;
+            }
+            
+            // Show loading indicator
+            itemsGrid.innerHTML = '<div class="loading-indicator">Analyzing image...</div>';
             detectedItems.style.display = 'block';
             
             // Create a canvas to capture the full frame
@@ -205,9 +277,20 @@
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     itemsGrid.innerHTML = '';
+                    
+                    if (data.items.length === 0) {
+                        itemsGrid.innerHTML = '<div class="no-items">No items detected</div>';
+                        return;
+                    }
+                    
                     data.items.forEach(item => {
                         const itemCard = document.createElement('div');
                         itemCard.className = 'item-card';
@@ -217,9 +300,12 @@
                         `;
                         itemsGrid.appendChild(itemCard);
                     });
-                    detectedItems.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error analyzing frame:', error);
+                    itemsGrid.innerHTML = '<div class="error-message">Error analyzing image. Please try again.</div>';
                 });
-            }, 'image/jpeg');
+            }, 'image/jpeg', 0.9);
         }
     </script>
 </body>
